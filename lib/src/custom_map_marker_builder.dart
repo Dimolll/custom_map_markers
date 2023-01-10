@@ -26,6 +26,8 @@ class CustomMapMarkerBuilder extends StatelessWidget {
   final Widget Function(BuildContext context, List<Uint8List>? imagesData)
       builder;
 
+  final double? pixelRatio;
+
   /// [controller] controls the state of captured images from widgets.
   late final _MarkersController controller;
 
@@ -34,6 +36,7 @@ class CustomMapMarkerBuilder extends StatelessWidget {
     required this.markerWidgets,
     required this.builder,
     this.screenshotDelay = const Duration(milliseconds: 500),
+    this.pixelRatio,
   }) : super(key: key) {
     controller = _MarkersController(
         value: List<Uint8List?>.filled(markerWidgets.length, null),
@@ -52,6 +55,7 @@ class CustomMapMarkerBuilder extends StatelessWidget {
                     key: ObjectKey(markerWidgets[index]),
                     child: markerWidgets[index],
                     screenshotDelay: screenshotDelay,
+                    pixelRatio: pixelRatio,
                     onImageCaptured: (data) {
                       controller.updateRenderedImage(index, data);
                     },
@@ -88,13 +92,15 @@ class CustomGoogleMapMarkerBuilder extends StatefulWidget {
   /// images are not ready yet or list of google maps [Marker] when custom
   /// markers are ready.
   final Widget Function(BuildContext, Set<Marker> markers) builder;
+  final double? pixelRatio;
 
-  CustomGoogleMapMarkerBuilder(
-      {Key? key,
-      required this.customMarkers,
-      required this.builder,
-      this.screenshotDelay = const Duration(milliseconds: 500)})
-      : super(key: key);
+  const CustomGoogleMapMarkerBuilder({
+    Key? key,
+    required this.customMarkers,
+    required this.builder,
+    this.screenshotDelay = const Duration(milliseconds: 500),
+    this.pixelRatio,
+  }) : super(key: key);
 
   @override
   State<CustomGoogleMapMarkerBuilder> createState() =>
@@ -109,6 +115,7 @@ class _CustomGoogleMapMarkerBuilderState
   Widget build(BuildContext context) {
     return CustomMapMarkerBuilder(
       screenshotDelay: widget.screenshotDelay,
+      pixelRatio: widget.pixelRatio,
       markerWidgets: widget.customMarkers
           .map((customMarker) => customMarker.child)
           .toList(),
@@ -127,7 +134,7 @@ class _CustomGoogleMapMarkerBuilderState
                 : widget.customMarkers
                     .map((e) => e.marker.copyWith(
                         iconParam: BitmapDescriptor.fromBytes(
-                            customMarkerImagesData![
+                            customMarkerImagesData[
                                 widget.customMarkers.indexOf(e)])))
                     .toSet());
       },

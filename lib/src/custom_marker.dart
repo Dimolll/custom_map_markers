@@ -1,4 +1,3 @@
-import 'dart:typed_data';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
@@ -12,13 +11,15 @@ class CustomMarker extends StatefulWidget {
   final Widget child;
   final Function(Uint8List?)? onImageCaptured;
   final Duration? screenshotDelay;
+  final double? pixelRatio;
 
-  const CustomMarker(
-      {Key? key,
-      required this.child,
-      this.onImageCaptured,
-      this.screenshotDelay})
-      : super(key: key);
+  const CustomMarker({
+    Key? key,
+    required this.child,
+    this.onImageCaptured,
+    this.screenshotDelay,
+    this.pixelRatio,
+  }) : super(key: key);
 
   @override
   _CustomMarkerState createState() => _CustomMarkerState();
@@ -37,7 +38,7 @@ class _CustomMarkerState extends State<CustomMarker> {
 
   @override
   Widget build(BuildContext context) {
-    WidgetsBinding.instance?.addPostFrameCallback((_) {
+    WidgetsBinding.instance.addPostFrameCallback((_) {
       lock.synchronized(() async {
         await Future.delayed(
             widget.screenshotDelay ?? const Duration(milliseconds: 500));
@@ -64,7 +65,8 @@ class _CustomMarkerState extends State<CustomMarker> {
         await Future.delayed(const Duration(milliseconds: 200));
         return _capturePng(iconKey);
       }
-      ui.Image? image = await boundary?.toImage(pixelRatio: 3.0);
+      ui.Image? image =
+          await boundary?.toImage(pixelRatio: widget.pixelRatio ?? 3.0);
       ByteData? byteData =
           await image?.toByteData(format: ui.ImageByteFormat.png);
       var pngBytes = byteData?.buffer.asUint8List();
